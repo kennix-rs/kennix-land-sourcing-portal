@@ -47,18 +47,18 @@ export const initialAgents: Agent[] = agentRows.map((row, index) => ({
 }))
 
 const assignmentRows = [
-  ['KX-LS-000248', 'KX-2026-000248', 'Rohan Khanna', '+91 98100 22048', 'New Chandigarh', '140901', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-000272', 'KX-2026-000272', 'Jayant Kumar', '+91 98100 22072', 'New Chandigarh', '140901', 'Standalone Apartment', 'Medium'],
-  ['KX-LS-000256', 'KX-2026-000256', 'Aditya Rao', '+91 98100 22056', 'Ludhiana', '141001', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-000266', 'KX-2026-000266', 'Rajiv Khurana', '+91 98100 22066', 'Ludhiana', '141001', 'Commercial Building', 'Medium'],
-  ['KX-LS-000244', 'KX-2026-000244', 'Neha Kapoor', '+91 98100 22044', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
-  ['KX-LS-000278', 'KX-2026-000278', 'Lakshay Gupta', '+91 98100 22078', 'Delhi NCR', '110001', 'Commercial Building', 'High'],
-  ['KX-LS-000264', 'KX-2026-000264', 'Varun Sehgal', '+91 98100 22064', 'Zirakpur', '140603', 'Individual House (1 Floor / Villa)', 'Medium'],
-  ['KX-LS-000274', 'KX-2026-000274', 'Abhishek Dutta', '+91 98100 22074', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
-  ['KX-LS-000258', 'KX-2026-000258', 'Kunal Sood', '+91 98100 22058', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-000280', 'KX-2026-000280', 'Yash Malhotra', '+91 98100 22080', 'Gurugram', '122001', 'Commercial Building', 'Medium'],
-  ['KX-LS-000250', 'KX-2026-000250', 'Amanpreet Singh', '+91 98100 22050', 'Gurugram', '122001', 'Individual House (1 Floor / Villa)', 'Medium'],
-  ['KX-LS-000260', 'KX-2026-000260', 'Deepak Yadav', '+91 98100 22060', 'Gurugram', '122001', 'Standalone Apartment', 'Low'],
+  ['KX-LS-2026-000248', 'KX-2026-000248', 'Rohan Khanna', '+91 98100 22048', 'New Chandigarh', '140901', 'Individual House (1 Floor / Villa)', 'High'],
+  ['KX-LS-2026-000272', 'KX-2026-000272', 'Jayant Kumar', '+91 98100 22072', 'New Chandigarh', '140901', 'Standalone Apartment', 'Medium'],
+  ['KX-LS-2026-000256', 'KX-2026-000256', 'Aditya Rao', '+91 98100 22056', 'Ludhiana', '141001', 'Individual House (1 Floor / Villa)', 'High'],
+  ['KX-LS-2026-000266', 'KX-2026-000266', 'Rajiv Khurana', '+91 98100 22066', 'Ludhiana', '141001', 'Commercial Building', 'Medium'],
+  ['KX-LS-2026-000244', 'KX-2026-000244', 'Neha Kapoor', '+91 98100 22044', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
+  ['KX-LS-2026-000278', 'KX-2026-000278', 'Lakshay Gupta', '+91 98100 22078', 'Delhi NCR', '110001', 'Commercial Building', 'High'],
+  ['KX-LS-2026-000264', 'KX-2026-000264', 'Varun Sehgal', '+91 98100 22064', 'Zirakpur', '140603', 'Individual House (1 Floor / Villa)', 'Medium'],
+  ['KX-LS-2026-000274', 'KX-2026-000274', 'Abhishek Dutta', '+91 98100 22074', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
+  ['KX-LS-2026-000258', 'KX-2026-000258', 'Kunal Sood', '+91 98100 22058', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'High'],
+  ['KX-LS-2026-000280', 'KX-2026-000280', 'Yash Malhotra', '+91 98100 22080', 'Gurugram', '122001', 'Commercial Building', 'Medium'],
+  ['KX-LS-2026-000250', 'KX-2026-000250', 'Amanpreet Singh', '+91 98100 22050', 'Gurugram', '122001', 'Individual House (1 Floor / Villa)', 'Medium'],
+  ['KX-LS-2026-000260', 'KX-2026-000260', 'Deepak Yadav', '+91 98100 22060', 'Gurugram', '122001', 'Standalone Apartment', 'Low'],
 ] as const
 
 export const initialAssignments: Assignment[] = assignmentRows.map((row, index) => {
