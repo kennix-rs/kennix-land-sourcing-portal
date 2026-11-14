@@ -34,6 +34,13 @@ describe('Land Sourcing fixtures', () => {
     }
   })
 
+  it('uses the Telesales reference format, with the journey year included', () => {
+    for (const assignment of state.assignments) {
+      expect(assignment.journeyId).toMatch(/^KX-\d{4}-\d{6}$/)
+      expect(assignment.id).toBe(assignment.journeyId.replace('KX-', 'KX-LS-'))
+    }
+  })
+
   it('searches agents by name, area, pincode and deal type', () => {
     expect(state.agents.filter(agent => matchesAgent(agent, 'Aman Khurana', 'All'))).toHaveLength(1)
     expect(state.agents.filter(agent => matchesAgent(agent, 'Aerocity', 'All'))).toHaveLength(1)

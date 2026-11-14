@@ -4,7 +4,7 @@ import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSear
 import { createInitialState, matchesAgent, matchingAgents, PASSWORD, users } from './data'
 import type { Agent, AppState, Assignment, AssignmentStatus, DealType, LandOption, Outreach, User } from './types'
 
-const STATE_KEY = 'kennix.land-sourcing.state.v1'
+const STATE_KEY = 'kennix.land-sourcing.state.v2'
 const USER_KEY = 'kennix.land-sourcing.user.v1'
 
 function readState(): AppState {
