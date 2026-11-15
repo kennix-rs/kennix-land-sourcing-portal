@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createInitialState, matchesAgent, matchingAgents } from '../data'
+import { createInitialState, dealTypesFor, landTypes, matchesAgent, matchingAgents } from '../data'
+import { DEAL_TYPES } from '../types'
 
 describe('Land Sourcing fixtures', () => {
   const state = createInitialState()
@@ -44,8 +45,24 @@ describe('Land Sourcing fixtures', () => {
   it('searches agents by name, area, pincode and deal type', () => {
     expect(state.agents.filter(agent => matchesAgent(agent, 'Aman Khurana', 'All'))).toHaveLength(1)
     expect(state.agents.filter(agent => matchesAgent(agent, 'Aerocity', 'All'))).toHaveLength(1)
-    expect(state.agents.filter(agent => matchesAgent(agent, '160055', 'Plots')).length).toBeGreaterThan(0)
-    expect(state.agents.filter(agent => matchesAgent(agent, '', 'Houses')).length).toBeGreaterThan(0)
+    expect(state.agents.filter(agent => matchesAgent(agent, '160055', 'Open Plots')).length).toBeGreaterThan(0)
+    expect(state.agents.filter(agent => matchesAgent(agent, '', 'Independent Houses')).length).toBeGreaterThan(0)
+  })
+
+  it('maps the old Plots / Lands / Houses types to the four land types', () => {
+    expect(landTypes(['Plots', 'Lands'])).toEqual(['Open Plots', 'Commercial Plots', 'Commercial Lands'])
+    expect(landTypes(['Plots', 'Houses'])).toEqual(['Open Plots', 'Independent Houses'])
+    expect(landTypes(['Lands'])).toEqual(['Commercial Lands'])
+    expect(state.agents.every(agent => agent.dealsIn.every(type => DEAL_TYPES.includes(type)) && agent.brokeragePercent > 0 && agent.primaryWorkArea)).toBe(true)
+  })
+
+  it('matches commercial requirements to commercial land and homes to open plots', () => {
+    expect(dealTypesFor('Commercial Building')).toEqual(['Commercial Plots', 'Commercial Lands'])
+    expect(dealTypesFor('Individual House (1 Floor / Villa)')).toEqual(['Open Plots'])
+    // The selected options keep the titles the Sales demo shows (e.g. "Kharar residential plot").
+    const titles = state.assignments.flatMap(item => item.landOptions.map(option => option.title))
+    expect(titles).toContain('Kharar residential plot')
+    expect(titles).toContain('Ludhiana land parcel')
   })
 
   it('recommends local agents for assignment locations', () => {

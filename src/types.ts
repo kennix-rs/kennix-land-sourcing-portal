@@ -1,5 +1,7 @@
 export type Role = 'executive' | 'team_lead' | 'manager'
-export type DealType = 'Plots' | 'Lands' | 'Houses'
+/** Land types an agent deals in (shared with the agent registration form; replaced Plots / Lands / Houses on 2026-11-15). */
+export type DealType = 'Open Plots' | 'Commercial Plots' | 'Independent Houses' | 'Commercial Lands'
+export const DEAL_TYPES: DealType[] = ['Open Plots', 'Commercial Plots', 'Independent Houses', 'Commercial Lands']
 export type AssignmentStatus = 'New' | 'Agent Search' | 'Options Found' | 'Land Identified' | 'Sent to Sales'
 
 export interface User {
@@ -24,6 +26,15 @@ export interface Agent {
   dealsIn: DealType[]
   active: boolean
   createdAt: string
+  alternateMobile: string
+  address: string
+  primaryWorkArea: string
+  otherAreas: string[]
+  brokeragePercent: number
+  /** KENNIX relationship manager (a Land Sourcing team member), if any. */
+  kennixManager: string
+  /** Added by the KENNIX team, or by the agent through the registration form. */
+  source: 'KENNIX' | 'Self-registration'
 }
 
 export interface Outreach {

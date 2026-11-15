@@ -12,7 +12,8 @@ import { ApiLandSourcingService } from './apiLandSourcingService'
 
 export type NewOutreach = Pick<Outreach, 'agentId' | 'outcome' | 'notes'>
 export type NewLandOption = Omit<LandOption, 'id' | 'addedAt' | 'status'>
-export type NewAgent = Omit<Agent, 'id' | 'createdAt' | 'active'>
+/** What the team fills in; the ID, creation time and source ("KENNIX") are set by the service. */
+export type NewAgent = Omit<Agent, 'id' | 'createdAt' | 'source'>
 
 export interface LandSourcingService {
   /** Accounts offered on the sign-in page. */
@@ -33,7 +34,7 @@ export interface LandSourcingService {
   addAgent(agent: NewAgent): Promise<Agent>
 }
 
-export const STATE_KEY = 'kennix.land-sourcing.state.v3'
+export const STATE_KEY = 'kennix.land-sourcing.state.v4'
 export const USER_KEY = 'kennix.land-sourcing.user.v1'
 
 const ORDER: AssignmentStatus[] = ['New', 'Agent Search', 'Options Found', 'Land Identified', 'Sent to Sales']
@@ -148,7 +149,7 @@ export class LocalLandSourcingService implements LandSourcingService {
 
   async addAgent(agent: NewAgent) {
     const state = this.read()
-    const next: Agent = { ...agent, id: `AG-${String(state.agents.length + 1).padStart(4, '0')}`, active: true, createdAt: new Date().toISOString() }
+    const next: Agent = { ...agent, id: `AG-${String(state.agents.length + 1).padStart(4, '0')}`, createdAt: new Date().toISOString(), source: 'KENNIX' }
     this.write({ ...state, agents: [next, ...state.agents] })
     return next
   }

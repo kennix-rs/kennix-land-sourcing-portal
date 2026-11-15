@@ -1,4 +1,4 @@
-import type { Agent, AppState, Assignment, AssignmentStatus, DealType, User } from './types'
+import { DEAL_TYPES, type Agent, type AppState, type Assignment, type AssignmentStatus, type DealType, type User } from './types'
 
 export const PASSWORD = 'Preview@123'
 
@@ -8,7 +8,10 @@ export const users: User[] = [
   { id: 'ls-meera', name: 'Meera Kapoor', email: 'meera.kapoor@kennix.in', role: 'manager', title: 'Land Sourcing Manager', initials: 'MK' },
 ]
 
-const agentRows: [string, string, string, string, string, string, string, string, DealType[]][] = [
+/** The demo rows were written with the old Plots / Lands / Houses types; `landTypes` maps them. */
+type LegacyDeal = 'Plots' | 'Lands' | 'Houses'
+
+const agentRows: [string, string, string, string, string, string, string, string, LegacyDeal[]][] = [
   ['Northfield Realty', 'Aman Khurana', '+91 98150 12001', 'aman@northfield.example.com', 'Aerocity', 'Mohali', '160055', 'Punjab', ['Plots', 'Lands']],
   ['Tricity Land Bank', 'Gurpreet Sandhu', '+91 98150 12002', 'gurpreet@tricityland.example.com', 'New Chandigarh', 'New Chandigarh', '140901', 'Punjab', ['Plots', 'Lands']],
   ['Capital Estates', 'Rohit Malhotra', '+91 98150 12003', 'rohit@capitalestates.example.com', 'Sector 17', 'Chandigarh', '160017', 'Chandigarh', ['Plots', 'Houses']],
@@ -31,6 +34,15 @@ const agentRows: [string, string, string, string, string, string, string, string
   ['Aravali Realty Partners', 'Naveen Dahiya', '+91 98150 12020', 'naveen@aravali.example.com', 'Sohna Road', 'Gurugram', '122103', 'Haryana', ['Lands', 'Plots', 'Houses']],
 ]
 
+/** Plots → Open Plots, Lands → Commercial Lands, Houses → Independent Houses; agents in both plots and lands also handle commercial plots. */
+export function landTypes(legacy: LegacyDeal[]): DealType[] {
+  const mapped: DealType[] = legacy.map(deal => (deal === 'Plots' ? 'Open Plots' : deal === 'Lands' ? 'Commercial Lands' : 'Independent Houses'))
+  if (legacy.includes('Plots') && legacy.includes('Lands')) mapped.push('Commercial Plots')
+  return DEAL_TYPES.filter(type => mapped.includes(type))
+}
+
+const MANAGERS = ['Neha Sharma', 'Vikram Bedi', 'Meera Kapoor']
+
 export const initialAgents: Agent[] = agentRows.map((row, index) => ({
   id: `AG-${String(index + 1).padStart(4, '0')}`,
   companyName: row[0],
@@ -41,9 +53,16 @@ export const initialAgents: Agent[] = agentRows.map((row, index) => ({
   city: row[5],
   pincode: row[6],
   state: row[7],
-  dealsIn: row[8],
+  dealsIn: landTypes(row[8]),
   active: true,
   createdAt: `2026-10-${String(8 + (index % 20)).padStart(2, '0')}T10:00:00+05:30`,
+  alternateMobile: '',
+  address: `${row[4]}, ${row[5]}, ${row[7]} ${row[6]}`,
+  primaryWorkArea: row[4],
+  otherAreas: [],
+  brokeragePercent: [1, 1.5, 2][index % 3],
+  kennixManager: MANAGERS[index % 3],
+  source: 'KENNIX',
 }))
 
 // The journeys Telesales sent to Land Sourcing in its demo (kennix-telesales-portal fixtures):
@@ -67,7 +86,7 @@ const assignmentRows: AssignmentRow[] = [
 
 export const initialAssignments: Assignment[] = assignmentRows.map(([journeyId, customerName, mobileNumber, city, pincode, propertyType, priority, status, receivedAt, completedAt], index) => {
   const assignedTo = index % 3 === 0 ? 'ls-vikram' : 'ls-neha'
-  const deal: DealType = propertyType === 'Commercial Building' ? 'Lands' : 'Plots'
+  const deal: DealType = propertyType === 'Commercial Building' ? 'Commercial Lands' : 'Open Plots'
   const agent = initialAgents.find(item => item.city === city && item.dealsIn.includes(deal)) ?? initialAgents.find(item => item.city === city) ?? initialAgents[index]
   const hasOutreach = status !== 'New'
   const hasOption = status === 'Options Found' || status === 'Land Identified' || status === 'Sent to Sales'
@@ -96,7 +115,7 @@ export const initialAssignments: Assignment[] = assignmentRows.map(([journeyId, 
     landOptions: hasOption ? [{
       id: `LAND-${String(index + 1).padStart(4, '0')}`,
       agentId: agent.id,
-      title: `${city} ${deal === 'Lands' ? 'land parcel' : 'residential plot'}`,
+      title: `${city} ${deal === 'Commercial Lands' ? 'land parcel' : 'residential plot'}`,
       location: agent.location,
       city,
       pincode,
@@ -119,22 +138,30 @@ export function createInitialState(): AppState {
 
 export function matchesAgent(agent: Agent, search: string, deal: DealType | 'All') {
   const query = search.trim().toLowerCase()
-  const text = [agent.companyName, agent.agentName, agent.mobile, agent.email, agent.location, agent.city, agent.pincode, agent.state].join(' ').toLowerCase()
+  const text = [agent.companyName, agent.agentName, agent.mobile, agent.alternateMobile, agent.email, agent.location, agent.primaryWorkArea, ...agent.otherAreas, agent.city, agent.pincode, agent.state].join(' ').toLowerCase()
   return (!query || text.includes(query)) && (deal === 'All' || agent.dealsIn.includes(deal))
+}
+
+/** Land types that can serve a requirement: commercial buildings need commercial plots or land, homes need open plots. */
+export function dealTypesFor(propertyType: string): DealType[] {
+  return propertyType === 'Commercial Building' ? ['Commercial Plots', 'Commercial Lands'] : ['Open Plots']
 }
 
 export function matchingAgents(agents: Agent[], assignment: Assignment) {
   const locations = assignment.preferredLocations
-  const targetDeal: DealType = assignment.propertyType === 'Commercial Building' ? 'Lands' : 'Plots'
+  const wanted = dealTypesFor(assignment.propertyType)
   return agents
-    .filter(agent => agent.active && agent.dealsIn.includes(targetDeal))
-    .map(agent => ({
-      agent,
-      score: Math.max(...locations.map(location =>
-        (agent.pincode === location.pincode ? 4 : 0) +
-        (agent.city.toLowerCase() === location.name.toLowerCase() ? 3 : 0) +
-        (agent.location.toLowerCase().includes(location.name.toLowerCase()) ? 2 : 0))),
-    }))
+    .filter(agent => agent.active && agent.dealsIn.some(type => wanted.includes(type)))
+    .map(agent => {
+      const areas = [agent.location, agent.primaryWorkArea, ...agent.otherAreas].map(area => area.toLowerCase())
+      return {
+        agent,
+        score: Math.max(...locations.map(location =>
+          (agent.pincode === location.pincode ? 4 : 0) +
+          (agent.city.toLowerCase() === location.name.toLowerCase() ? 3 : 0) +
+          (areas.some(area => area.includes(location.name.toLowerCase())) ? 2 : 0))),
+      }
+    })
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score || a.agent.agentName.localeCompare(b.agent.agentName))
 }

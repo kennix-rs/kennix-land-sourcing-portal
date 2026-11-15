@@ -20,9 +20,14 @@ interface EnumValue { code: string; label: string }
 
 // --- Wire types (camelCase JSON from the API) ---------------------------------------------
 
-interface ApiAgent {
+export interface ApiAgent {
   id: string; companyName: string; agentName: string; mobile: string; email: string; location: string
   city: string; pincode: string; state: string; dealsIn: EnumValue[]; active: boolean; createdAt: string
+  alternateMobile?: string; address?: string; primaryWorkArea?: string; otherAreas?: string[]
+  /** DRF sends decimals as strings. */
+  brokeragePercent?: string | number | null
+  kennixManager?: { id: string; name: string } | null
+  source?: EnumValue
 }
 interface ApiOutreach { id: string; agentId: string; contactedAt: string; outcome: EnumValue; notes: string; actor: string }
 interface ApiLandOption {
@@ -55,7 +60,14 @@ export function toUser(person: ApiPerson, memberships: ApiMembership[]): User | 
 }
 
 export function toAgent(agent: ApiAgent): Agent {
-  return { ...agent, dealsIn: agent.dealsIn.map(item => item.label as DealType) }
+  return {
+    id: agent.id, companyName: agent.companyName, agentName: agent.agentName, mobile: agent.mobile, email: agent.email,
+    location: agent.location, city: agent.city, pincode: agent.pincode, state: agent.state, active: agent.active, createdAt: agent.createdAt,
+    dealsIn: agent.dealsIn.map(item => item.label as DealType),
+    alternateMobile: agent.alternateMobile ?? '', address: agent.address ?? '', primaryWorkArea: agent.primaryWorkArea ?? agent.location,
+    otherAreas: agent.otherAreas ?? [], brokeragePercent: Number(agent.brokeragePercent ?? 0), kennixManager: agent.kennixManager?.name ?? '',
+    source: agent.source?.code === 'self_registration' ? 'Self-registration' : 'KENNIX',
+  }
 }
 
 export function toAssignment(item: ApiRequest): Assignment {
@@ -216,6 +228,10 @@ export class ApiLandSourcingService implements LandSourcingService {
   }
 
   async addAgent(agent: NewAgent) {
-    return toAgent(await request<ApiAgent>('POST', '/land-sourcing/agents/', agent))
+    // The API takes the KENNIX manager as a user ID; the form picks a name from the Land Sourcing team.
+    const members = agent.kennixManager ? await request<{ user: { id: string; name: string } }[]>('GET', '/land-sourcing/members/') : []
+    const { kennixManager, ...rest } = agent
+    const managerId = members.find(member => member.user.name === kennixManager)?.user.id ?? null
+    return toAgent(await request<ApiAgent>('POST', '/land-sourcing/agents/', { ...rest, kennixManager: managerId }))
   }
 }
