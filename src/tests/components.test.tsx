@@ -21,8 +21,10 @@ describe('Land Sourcing portal', () => {
     render(<MemoryRouter initialEntries={['/requirements?status=New']}><App/></MemoryRouter>)
 
     expect(screen.getByRole('combobox', { name: 'Assignment status' })).toHaveValue('New')
-    expect(screen.getByText('Neha Kapoor')).toBeInTheDocument()
-    expect(screen.getByText('Kunal Sood')).toBeInTheDocument()
+    // Neha's own New requirement; KX-LS-2026-000244 (Neha Kapoor) is Vikram's and Jayant Kumar's
+    // has options already.
+    expect(screen.getByText('Rohan Khanna')).toBeInTheDocument()
+    expect(screen.queryByText('Neha Kapoor')).not.toBeInTheDocument()
     expect(screen.queryByText('Jayant Kumar')).not.toBeInTheDocument()
   })
 })

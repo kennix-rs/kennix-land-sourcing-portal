@@ -21,7 +21,7 @@ describe('Land Sourcing fixtures', () => {
 
   it('keeps assignment agent and land-option references valid', () => {
     const agentIds = new Set(state.agents.map(agent => agent.id))
-    expect(state.assignments).toHaveLength(12)
+    expect(state.assignments).toHaveLength(10)
     for (const assignment of state.assignments) {
       expect(assignment.preferredLocations.every(location => location.name && /^\d{6}$/.test(location.pincode))).toBe(true)
       expect(assignment.selectedAgentIds.every(id => agentIds.has(id))).toBe(true)
