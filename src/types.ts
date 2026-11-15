@@ -66,9 +66,14 @@ export interface Assignment {
   id: string
   journeyId: string
   customerName: string
-  mobileNumber: string
+  /** Land Sourcing never sees the customer's number, only a masked one, so leads can't leak to agents (DOMAIN.md §7). */
+  maskedMobile: string
   preferredLocations: { name: string; pincode: string }[]
   propertyType: string
+  size: string
+  budget: string
+  city: string
+  state: string
   receivedAt: string
   assignedTo: string
   priority: 'High' | 'Medium' | 'Low'

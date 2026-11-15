@@ -34,7 +34,7 @@ export interface LandSourcingService {
   addAgent(agent: NewAgent): Promise<Agent>
 }
 
-export const STATE_KEY = 'kennix.land-sourcing.state.v4'
+export const STATE_KEY = 'kennix.land-sourcing.state.v5'
 export const USER_KEY = 'kennix.land-sourcing.user.v1'
 
 const ORDER: AssignmentStatus[] = ['New', 'Agent Search', 'Options Found', 'Land Identified', 'Sent to Sales']

@@ -84,6 +84,22 @@ const assignmentRows: AssignmentRow[] = [
   ['KX-2026-000278', 'Lakshay Gupta', '+91 9810643467', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'Low', 'New', '2026-10-25T10:30:00.000Z', undefined],
 ]
 
+/** +91 98101 21737 → +91 98XXX XX737: enough to match a customer, not to call them (same rule as Telesales and the backend). */
+export function maskMobile(value: string) {
+  const digits = value.replace(/\D/g, '').slice(-10)
+  return digits.length === 10 ? `+91 ${digits.slice(0, 2)}XXX XX${digits.slice(-3)}` : 'XXXXX'
+}
+
+// Size and budget the Telesales demo captured for each handoff, and the state of each city.
+const REQUIREMENT: Record<string, [budget: string, size: string]> = {
+  'KX-2026-000244': ['₹2–3 Cr', '2,500–3,000 sq ft'], 'KX-2026-000248': ['₹1–1.5 Cr', '1,500–2,000 sq ft'],
+  'KX-2026-000250': ['₹2–3 Cr', '2,500–3,000 sq ft'], 'KX-2026-000256': ['₹2–3 Cr', '2,500–3,000 sq ft'],
+  'KX-2026-000257': ['₹3–4 Cr', '3,000–3,500 sq ft'], 'KX-2026-000260': ['₹1–1.5 Cr', '1,500–2,000 sq ft'],
+  'KX-2026-000264': ['₹4 Cr+', '3,500+ sq ft'], 'KX-2026-000266': ['₹1–1.5 Cr', '1,500–2,000 sq ft'],
+  'KX-2026-000272': ['₹1–1.5 Cr', '1,500–2,000 sq ft'], 'KX-2026-000278': ['₹1–1.5 Cr', '1,500–2,000 sq ft'],
+}
+const CITY_STATES: Record<string, string> = { Zirakpur: 'Punjab', Kharar: 'Punjab', Ludhiana: 'Punjab', 'New Chandigarh': 'Punjab', Gurugram: 'Haryana', 'Delhi NCR': 'Delhi' }
+
 export const initialAssignments: Assignment[] = assignmentRows.map(([journeyId, customerName, mobileNumber, city, pincode, propertyType, priority, status, receivedAt, completedAt], index) => {
   const assignedTo = index % 3 === 0 ? 'ls-vikram' : 'ls-neha'
   const deal: DealType = propertyType === 'Commercial Building' ? 'Commercial Lands' : 'Open Plots'
@@ -96,8 +112,12 @@ export const initialAssignments: Assignment[] = assignmentRows.map(([journeyId, 
     id: journeyId.replace('KX-', 'KX-LS-'),
     journeyId,
     customerName,
-    mobileNumber,
+    maskedMobile: maskMobile(mobileNumber),
     preferredLocations: [{ name: city, pincode }],
+    budget: REQUIREMENT[journeyId][0],
+    size: REQUIREMENT[journeyId][1],
+    city,
+    state: CITY_STATES[city] ?? '',
     propertyType,
     receivedAt,
     assignedTo,
