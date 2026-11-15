@@ -1,4 +1,4 @@
-import type { Agent, AppState, Assignment, DealType, User } from './types'
+import type { Agent, AppState, Assignment, AssignmentStatus, DealType, User } from './types'
 
 export const PASSWORD = 'Preview@123'
 
@@ -46,43 +46,49 @@ export const initialAgents: Agent[] = agentRows.map((row, index) => ({
   createdAt: `2026-10-${String(8 + (index % 20)).padStart(2, '0')}T10:00:00+05:30`,
 }))
 
-const assignmentRows = [
-  ['KX-LS-2026-000248', 'KX-2026-000248', 'Rohan Khanna', '+91 98100 22048', 'New Chandigarh', '140901', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-2026-000272', 'KX-2026-000272', 'Jayant Kumar', '+91 98100 22072', 'New Chandigarh', '140901', 'Standalone Apartment', 'Medium'],
-  ['KX-LS-2026-000256', 'KX-2026-000256', 'Aditya Rao', '+91 98100 22056', 'Ludhiana', '141001', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-2026-000266', 'KX-2026-000266', 'Rajiv Khurana', '+91 98100 22066', 'Ludhiana', '141001', 'Commercial Building', 'Medium'],
-  ['KX-LS-2026-000244', 'KX-2026-000244', 'Neha Kapoor', '+91 98100 22044', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
-  ['KX-LS-2026-000278', 'KX-2026-000278', 'Lakshay Gupta', '+91 98100 22078', 'Delhi NCR', '110001', 'Commercial Building', 'High'],
-  ['KX-LS-2026-000264', 'KX-2026-000264', 'Varun Sehgal', '+91 98100 22064', 'Zirakpur', '140603', 'Individual House (1 Floor / Villa)', 'Medium'],
-  ['KX-LS-2026-000274', 'KX-2026-000274', 'Abhishek Dutta', '+91 98100 22074', 'Zirakpur', '140603', 'Standalone Apartment', 'Low'],
-  ['KX-LS-2026-000258', 'KX-2026-000258', 'Kunal Sood', '+91 98100 22058', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'High'],
-  ['KX-LS-2026-000280', 'KX-2026-000280', 'Yash Malhotra', '+91 98100 22080', 'Gurugram', '122001', 'Commercial Building', 'Medium'],
-  ['KX-LS-2026-000250', 'KX-2026-000250', 'Amanpreet Singh', '+91 98100 22050', 'Gurugram', '122001', 'Individual House (1 Floor / Villa)', 'Medium'],
-  ['KX-LS-2026-000260', 'KX-2026-000260', 'Deepak Yadav', '+91 98100 22060', 'Gurugram', '122001', 'Standalone Apartment', 'Low'],
-] as const
+// The journeys Telesales sent to Land Sourcing in its demo (kennix-telesales-portal fixtures):
+// same customers, mobiles, locations, property types and handoff times. Statuses line up too:
+// Telesales shows "Land Identified" for 257, 260 and 266.
+type AssignmentRow = [journeyId: string, customerName: string, mobileNumber: string, location: string, pincode: string,
+  propertyType: string, priority: Assignment['priority'], status: AssignmentStatus, receivedAt: string, completedAt: string | undefined]
 
-export const initialAssignments: Assignment[] = assignmentRows.map((row, index) => {
-  const status = (['New', 'Agent Search', 'Options Found', 'Land Identified'] as const)[index % 4]
+const assignmentRows: AssignmentRow[] = [
+  ['KX-2026-000244', 'Neha Kapoor', '+91 9810052173', 'Zirakpur', '140603', 'Commercial Building', 'Medium', 'New', '2026-10-27T10:30:00.000Z', undefined],
+  ['KX-2026-000248', 'Rohan Khanna', '+91 9810121737', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'Low', 'New', '2026-10-31T10:30:00.000Z', undefined],
+  ['KX-2026-000250', 'Amanpreet Singh', '+91 9810156519', 'Gurugram', '122001', 'Commercial Building', 'Medium', 'Agent Search', '2026-11-02T10:30:00.000Z', undefined],
+  ['KX-2026-000256', 'Aditya Rao', '+91 9810260865', 'Ludhiana', '141001', 'Commercial Building', 'Medium', 'Options Found', '2026-11-08T10:30:00.000Z', undefined],
+  ['KX-2026-000257', 'Pooja Malhotra', '+91 9810278256', 'Kharar', '140301', 'Individual House (1 Floor / Villa)', 'Low', 'Sent to Sales', '2026-11-09T10:30:00.000Z', '2026-11-12T09:30:00.000Z'],
+  ['KX-2026-000260', 'Deepak Yadav', '+91 9810330429', 'Gurugram', '122001', 'Individual House (1 Floor / Villa)', 'Low', 'Land Identified', '2026-10-25T10:30:00.000Z', '2026-10-28T09:30:00.000Z'],
+  ['KX-2026-000264', 'Varun Sehgal', '+91 9810399993', 'Zirakpur', '140603', 'Individual House (1 Floor / Villa)', 'High', 'Agent Search', '2026-10-29T10:30:00.000Z', undefined],
+  ['KX-2026-000266', 'Rajiv Khurana', '+91 9810434775', 'Ludhiana', '141001', 'Individual House (1 Floor / Villa)', 'Low', 'Land Identified', '2026-10-31T10:30:00.000Z', '2026-11-03T09:30:00.000Z'],
+  ['KX-2026-000272', 'Jayant Kumar', '+91 9810539121', 'New Chandigarh', '140901', 'Individual House (1 Floor / Villa)', 'Low', 'Options Found', '2026-11-06T10:30:00.000Z', undefined],
+  ['KX-2026-000278', 'Lakshay Gupta', '+91 9810643467', 'Delhi NCR', '110001', 'Individual House (1 Floor / Villa)', 'Low', 'New', '2026-10-25T10:30:00.000Z', undefined],
+]
+
+export const initialAssignments: Assignment[] = assignmentRows.map(([journeyId, customerName, mobileNumber, city, pincode, propertyType, priority, status, receivedAt, completedAt], index) => {
   const assignedTo = index % 3 === 0 ? 'ls-vikram' : 'ls-neha'
-  const agent = initialAgents.find(item => item.city === row[4]) ?? initialAgents[index]
+  const deal: DealType = propertyType === 'Commercial Building' ? 'Lands' : 'Plots'
+  const agent = initialAgents.find(item => item.city === city && item.dealsIn.includes(deal)) ?? initialAgents.find(item => item.city === city) ?? initialAgents[index]
   const hasOutreach = status !== 'New'
-  const hasOption = status === 'Options Found' || status === 'Land Identified'
+  const hasOption = status === 'Options Found' || status === 'Land Identified' || status === 'Sent to Sales'
+  const landDone = status === 'Land Identified' || status === 'Sent to Sales'
+  const contactedAt = new Date(new Date(receivedAt).getTime() + 26 * 3600_000).toISOString()
   return {
-    id: row[0],
-    journeyId: row[1],
-    customerName: row[2],
-    mobileNumber: row[3],
-    preferredLocations: [{ name: row[4], pincode: row[5] }],
-    propertyType: row[6],
-    receivedAt: `2026-11-${String(1 + (index % 6)).padStart(2, '0')}T${String(9 + (index % 7)).padStart(2, '0')}:30:00+05:30`,
+    id: journeyId.replace('KX-', 'KX-LS-'),
+    journeyId,
+    customerName,
+    mobileNumber,
+    preferredLocations: [{ name: city, pincode }],
+    propertyType,
+    receivedAt,
     assignedTo,
-    priority: row[7],
+    priority,
     status,
     selectedAgentIds: hasOutreach ? [agent.id] : [],
     outreach: hasOutreach ? [{
       id: `OUT-${index + 1}`,
       agentId: agent.id,
-      contactedAt: `2026-11-${String(3 + (index % 4)).padStart(2, '0')}T11:00:00+05:30`,
+      contactedAt,
       outcome: hasOption ? 'Options received' : 'Will share options',
       notes: hasOption ? 'Agent shared an option matching the preferred micro-market.' : 'Agent will verify available inventory and revert.',
       actor: assignedTo === 'ls-vikram' ? 'Vikram Bedi' : 'Neha Sharma',
@@ -90,20 +96,20 @@ export const initialAssignments: Assignment[] = assignmentRows.map((row, index) 
     landOptions: hasOption ? [{
       id: `LAND-${String(index + 1).padStart(4, '0')}`,
       agentId: agent.id,
-      title: `${row[4]} ${index % 2 ? 'residential plot' : 'land parcel'}`,
+      title: `${city} ${deal === 'Lands' ? 'land parcel' : 'residential plot'}`,
       location: agent.location,
-      city: row[4],
-      pincode: row[5],
+      city,
+      pincode,
       state: agent.state,
       area: `${1800 + index * 125} sq ft`,
       askingPrice: `₹${95 + index * 8} lakh`,
       ownership: 'Individual owner',
-      status: status === 'Land Identified' ? 'Selected' : 'Shortlisted',
+      status: landDone ? 'Selected' : 'Shortlisted',
       notes: 'Title documents and site access to be verified before Sales meeting.',
-      addedAt: `2026-11-${String(4 + (index % 3)).padStart(2, '0')}T15:00:00+05:30`,
+      addedAt: new Date(new Date(contactedAt).getTime() + 24 * 3600_000).toISOString(),
     }] : [],
     notes: status === 'New' ? 'Review preferred location and identify suitable agents.' : 'Sourcing in progress with the selected local agent.',
-    ...(status === 'Land Identified' ? { completedAt: `2026-11-07T16:30:00+05:30` } : {}),
+    ...(completedAt ? { completedAt } : {}),
   }
 })
 
