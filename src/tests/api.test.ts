@@ -7,7 +7,8 @@ const API = 'http://localhost:8000/api/v1'
 const e = (code: string, label: string) => ({ code, label })
 
 const apiRequest: ApiRequest = {
-  id: 'KX-LS-2026-000250', journeyId: 'KX-2026-000250', customerName: 'Jayant Kumar', mobileNumber: '+91 98140 22050',
+  id: 'KX-LS-2026-000250', journeyId: 'KX-2026-000250', customerName: 'Jayant Kumar', maskedMobile: '+91 98XXX XX050',
+  size: e('2500_3000', '2,500–3,000 sq ft'), budget: e('2_3cr', '₹2–3 Cr'), city: 'Mohali', state: 'Punjab',
   preferredLocations: [{ name: 'Mohali', pincode: '160055' }], propertyType: e('individual_house', 'Individual House (1 Floor / Villa)'),
   receivedAt: '2026-11-01T05:30:00Z', assignedTo: { id: 'u-neha', name: 'Neha Sharma', initials: 'NS' },
   priority: e('high', 'High'), status: e('options_found', 'Options Found'), selectedAgentIds: ['AG-0001'],
@@ -72,7 +73,7 @@ describe('API mode', () => {
     const state = await service.load()
     expect(state.agents[0]).toMatchObject({ dealsIn: ['Open Plots', 'Commercial Lands'], brokeragePercent: 1.5, kennixManager: 'Vikram Bedi', source: 'Self-registration', otherAreas: ['Kharar'] })
     const [assignment] = state.assignments
-    expect(assignment).toMatchObject({ id: 'KX-LS-2026-000250', status: 'Options Found', priority: 'High', assignedTo: 'u-neha', propertyType: 'Individual House (1 Floor / Villa)' })
+    expect(assignment).toMatchObject({ id: 'KX-LS-2026-000250', status: 'Options Found', priority: 'High', assignedTo: 'u-neha', propertyType: 'Individual House (1 Floor / Villa)', maskedMobile: '+91 98XXX XX050', size: '2,500–3,000 sq ft', budget: '₹2–3 Cr', state: 'Punjab' })
     expect(assignment.outreach[0].outcome).toBe('Options received')
     expect(assignment.landOptions[0].status).toBe('Shortlisted')
     expect(assignment.completedAt).toBeUndefined()

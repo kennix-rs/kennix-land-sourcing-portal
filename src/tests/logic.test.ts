@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createInitialState, dealTypesFor, landTypes, matchesAgent, matchingAgents } from '../data'
+import { createInitialState, dealTypesFor, landTypes, maskMobile, matchesAgent, matchingAgents } from '../data'
 import { DEAL_TYPES } from '../types'
 
 describe('Land Sourcing fixtures', () => {
@@ -33,6 +33,16 @@ describe('Land Sourcing fixtures', () => {
         expect(assignment.completedAt).toBeTruthy()
       }
     }
+  })
+
+  it('never holds a full customer phone number, and carries size and budget', () => {
+    expect(maskMobile('+91 9810121737')).toBe('+91 98XXX XX737')
+    for (const assignment of state.assignments) {
+      expect(assignment.maskedMobile).toMatch(/^\+91 \d{2}XXX XX\d{3}$/)
+      expect(assignment.size && assignment.budget && assignment.city && assignment.state).toBeTruthy()
+    }
+    const rohan = state.assignments.find(item => item.journeyId === 'KX-2026-000248')!
+    expect(rohan).toMatchObject({ maskedMobile: '+91 98XXX XX737', budget: '₹1–1.5 Cr', size: '1,500–2,000 sq ft', state: 'Delhi' })
   })
 
   it('uses the Telesales reference format, with the journey year included', () => {

@@ -35,7 +35,8 @@ interface ApiLandOption {
   area: string; askingPrice: string; ownership: string; status: EnumValue; notes: string; addedAt: string
 }
 export interface ApiRequest {
-  id: string; journeyId: string; customerName: string; mobileNumber: string
+  id: string; journeyId: string; customerName: string; maskedMobile: string
+  size: EnumValue | null; budget: EnumValue | null; city: string; state: string
   preferredLocations: { name: string; pincode: string }[]; propertyType: EnumValue; receivedAt: string
   assignedTo: { id: string; name: string; initials: string }; priority: EnumValue; status: EnumValue
   selectedAgentIds: string[]; outreach: ApiOutreach[]; landOptions: ApiLandOption[]; notes: string
@@ -72,7 +73,8 @@ export function toAgent(agent: ApiAgent): Agent {
 
 export function toAssignment(item: ApiRequest): Assignment {
   return {
-    id: item.id, journeyId: item.journeyId, customerName: item.customerName, mobileNumber: item.mobileNumber,
+    id: item.id, journeyId: item.journeyId, customerName: item.customerName, maskedMobile: item.maskedMobile,
+    size: item.size?.label ?? '', budget: item.budget?.label ?? '', city: item.city, state: item.state,
     preferredLocations: item.preferredLocations.map(location => ({ name: location.name, pincode: location.pincode })),
     propertyType: item.propertyType.label, receivedAt: item.receivedAt, assignedTo: item.assignedTo.id,
     priority: item.priority.label as Assignment['priority'], status: item.status.label as Assignment['status'],
