@@ -19,7 +19,9 @@ const apiRequest: ApiRequest = {
 const apiAgent = {
   id: 'AG-0001', companyName: 'Northfield Realty', agentName: 'Aman Khurana', mobile: '+91 98150 12001',
   email: 'aman@northfield.example.com', location: 'Aerocity', city: 'Mohali', pincode: '160055', state: 'Punjab',
-  dealsIn: [e('plots', 'Plots'), e('lands', 'Lands')], active: true, createdAt: '2026-10-01T05:30:00Z',
+  dealsIn: [e('open_plots', 'Open Plots'), e('commercial_lands', 'Commercial Lands')], active: true, createdAt: '2026-10-01T05:30:00Z',
+  alternateMobile: '9815012999', address: 'SCO 12, Aerocity, Mohali', primaryWorkArea: 'Aerocity', otherAreas: ['Kharar'],
+  brokeragePercent: '1.50', kennixManager: { id: 'u-vikram', name: 'Vikram Bedi' }, source: e('self_registration', 'Self-registration'),
 }
 
 const session = {
@@ -68,7 +70,7 @@ describe('API mode', () => {
       ? { status: 200, body: { results: [apiRequest], next: null, previous: null } }
       : { status: 200, body: [apiAgent] }
     const state = await service.load()
-    expect(state.agents[0].dealsIn).toEqual(['Plots', 'Lands'])
+    expect(state.agents[0]).toMatchObject({ dealsIn: ['Open Plots', 'Commercial Lands'], brokeragePercent: 1.5, kennixManager: 'Vikram Bedi', source: 'Self-registration', otherAreas: ['Kharar'] })
     const [assignment] = state.assignments
     expect(assignment).toMatchObject({ id: 'KX-LS-2026-000250', status: 'Options Found', priority: 'High', assignedTo: 'u-neha', propertyType: 'Individual House (1 Floor / Villa)' })
     expect(assignment.outreach[0].outcome).toBe('Options received')
@@ -111,10 +113,16 @@ describe('API mode', () => {
     handler = url => {
       if (url.endsWith('/auth/token/refresh/')) return { status: 200, body: { access: 'access-2', refresh: 'refresh-2' } }
       if (first) { first = false; return { status: 401, body: { code: 'token_not_valid', message: 'Token expired' } } }
+      if (url.endsWith('/land-sourcing/members/')) return { status: 200, body: [{ user: { id: 'u-vikram', name: 'Vikram Bedi' } }] }
       return { status: 201, body: apiAgent }
     }
-    const agent = await service.addAgent({ companyName: 'X', agentName: 'Y', mobile: '1', email: 'a@b.co', location: 'L', city: 'C', pincode: '160055', state: 'S', dealsIn: ['Plots'] })
-    expect(agent.dealsIn).toEqual(['Plots', 'Lands'])
+    const agent = await service.addAgent({
+      companyName: 'X', agentName: 'Y', mobile: '1', alternateMobile: '', email: 'a@b.co', address: 'A', location: 'L', city: 'C', pincode: '160055', state: 'S',
+      primaryWorkArea: 'L', otherAreas: [], dealsIn: ['Open Plots'], brokeragePercent: 1, kennixManager: 'Vikram Bedi', active: true,
+    })
+    expect(agent.dealsIn).toEqual(['Open Plots', 'Commercial Lands'])
+    // The manager's name is sent as their user ID.
+    expect(JSON.parse(calls.at(-1)!.init.body as string)).toMatchObject({ kennixManager: 'u-vikram', brokeragePercent: 1 })
     expect(calls.at(-1)?.init.headers).toMatchObject({ Authorization: 'Bearer access-2' })
   })
 })
